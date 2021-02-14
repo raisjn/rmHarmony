@@ -50,6 +50,8 @@ namespace ui:
     static vector<input::Gesture*> gestures
     static TimerList timers
 
+    static bool filter_palm_events
+
     // variable: motion_event
     // motion_event is used for subscribing to motion_events
     //
@@ -118,9 +120,10 @@ namespace ui:
     // here.
     static void handle_events():
       for auto ev : in.all_motion_events:
-        touch := input::is_touch_event(ev)
-        if touch and touch->is_palm():
-            continue
+        if filter_palm_events:
+          touch := input::is_touch_event(ev)
+          if touch and touch->is_palm():
+              continue
 
         MainLoop::motion_event(ev)
         if ev._stop_propagation:
@@ -350,6 +353,7 @@ namespace ui:
   Scene MainLoop::kbd = make_scene()
   bool MainLoop::overlay_is_visible = false
   bool MainLoop::kbd_is_visible = false
+  bool MainLoop::filter_palm_events = true
 
   input::Input MainLoop::in = {}
   vector<input::Gesture*> MainLoop::gestures = {}

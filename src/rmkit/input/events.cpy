@@ -1,6 +1,7 @@
 #include <linux/input.h>
 #include "../defines.h"
 #include "../util/rm2fb.h"
+#include "../util/machine_id.h"
 
 // #define DEBUG_INPUT_EVENT 1
 
@@ -119,8 +120,8 @@ namespace input:
 
       if not self.was_palm and self.is_palm():
         self.was_palm = true
-
-      debug "IS PALM", was_palm
+        // the gesture ends if a palm was involved
+        self.lifted = true
 
     handle_abs(input_event data):
       switch data.code:
@@ -169,7 +170,11 @@ namespace input:
         if slots[i].left == 1:
           size += slots[i].size_major * slots[i].size_minor
 
-      return size > 1000
+      version := util::get_remarkable_version()
+      if version == util::RM_VERSION::RM2:
+        return size > 1000
+
+      return false
 
     def marshal():
       SynMotionEvent syn_ev;
