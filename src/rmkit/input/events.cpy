@@ -102,7 +102,6 @@ namespace input:
       int width_major = 1
       int width_minor = 1
     ;
-    bool was_palm = false
 
 
     vector<TouchPoint> slots;
@@ -110,18 +109,7 @@ namespace input:
       slots.resize(MAX_SLOTS)
 
     void initialize():
-      // reset palm only if all fingers lifted
-      // if self.count_fingers() == 0:
-      // reset palm if any finger lifted
-      if self.lifted:
-        self.was_palm = false
-
       self.lifted = false
-
-      if not self.was_palm and self.is_palm():
-        self.was_palm = true
-        // the gesture ends if a palm was involved
-        self.lifted = true
 
     handle_abs(input_event data):
       switch data.code:

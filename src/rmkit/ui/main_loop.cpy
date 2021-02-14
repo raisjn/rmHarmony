@@ -120,12 +120,6 @@ namespace ui:
     // here.
     static void handle_events():
       for auto ev : in.all_motion_events:
-        if filter_palm_events:
-          touch := input::is_touch_event(ev)
-          is_palm := touch && touch->is_palm()
-          if is_palm:
-            debug "PALM", &touch, is_palm
-
         MainLoop::motion_event(ev)
         if ev._stop_propagation:
           continue
@@ -144,7 +138,11 @@ namespace ui:
         for auto g : gestures:
           g->reset()
 
-      for auto ev: ui::MainLoop::in.touch.events:
+      for auto &ev: ui::MainLoop::in.touch.events:
+        if ev.is_palm():
+          for auto g : gestures:
+            g->reset()
+
         for auto g : gestures:
           if ev.lifted:
             if g->valid:
