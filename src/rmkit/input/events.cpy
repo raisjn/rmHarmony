@@ -167,10 +167,8 @@ namespace input:
 
       version := util::get_remarkable_version()
       if version == util::RM_VERSION::RM2:
-        debug "TOTAL SIZE", size, MIN_PALM_SIZE
         return size > MIN_PALM_SIZE
 
-      debug "TOTAL SIZE", size, (MIN_PALM_SIZE/2)
       return size > (MIN_PALM_SIZE / 2)
 
     def marshal():

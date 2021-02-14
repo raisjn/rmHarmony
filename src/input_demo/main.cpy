@@ -114,6 +114,7 @@ class App:
 
     ui::MainLoop::key_event += PLS_DELEGATE(self.handle_key_event)
     ui::MainLoop::motion_event += PLS_DELEGATE(self.handle_motion_event)
+    ui::MainLoop::filter_palm_events = true
 
     // just to kick off the app, we do a full redraw
     ui::MainLoop::refresh()

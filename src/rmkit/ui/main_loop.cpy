@@ -139,9 +139,10 @@ namespace ui:
           g->reset()
 
       for auto &ev: ui::MainLoop::in.touch.events:
-        if ev.is_palm():
-          for auto g : gestures:
-            g->reset()
+        if filter_palm_events:
+          if ev.is_palm():
+            for auto g : gestures:
+              g->reset()
 
         for auto g : gestures:
           if ev.lifted:
@@ -352,7 +353,7 @@ namespace ui:
   Scene MainLoop::kbd = make_scene()
   bool MainLoop::overlay_is_visible = false
   bool MainLoop::kbd_is_visible = false
-  bool MainLoop::filter_palm_events = true
+  bool MainLoop::filter_palm_events = false
 
   input::Input MainLoop::in = {}
   vector<input::Gesture*> MainLoop::gestures = {}
