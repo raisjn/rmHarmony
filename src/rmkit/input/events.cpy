@@ -177,12 +177,13 @@ namespace input:
     bool is_palm():
       size := max_touch_area()
 
-      debug "TOTAL SIZE", size, MIN_PALM_SIZE
       version := util::get_remarkable_version()
       if version == util::RM_VERSION::RM2:
+        debug "TOTAL SIZE", size, MIN_PALM_SIZE
         return size > MIN_PALM_SIZE
 
-      return false
+      debug "TOTAL SIZE", size, (MIN_PALM_SIZE/2)
+      return size > (MIN_PALM_SIZE / 2)
 
     def marshal():
       SynMotionEvent syn_ev;
