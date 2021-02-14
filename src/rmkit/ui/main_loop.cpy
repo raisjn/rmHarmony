@@ -118,6 +118,10 @@ namespace ui:
     // here.
     static void handle_events():
       for auto ev : in.all_motion_events:
+        touch := input::is_touch_event(ev)
+        if touch and touch->is_palm():
+            continue
+
         MainLoop::motion_event(ev)
         if ev._stop_propagation:
           continue

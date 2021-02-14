@@ -94,16 +94,33 @@ namespace input:
     int slot = 0, left = -1
     bool lifted=false
     static int MAX_SLOTS
-    struct Point:
+    struct TouchPoint:
       int x=-1, y=-1, left=-1
+      int size_major = 1
+      int size_minor = 1
+      int width_major = 1
+      int width_minor = 1
     ;
+    bool was_palm = false
 
-    vector<Point> slots;
+
+    vector<TouchPoint> slots;
     TouchEvent():
       slots.resize(MAX_SLOTS)
 
     void initialize():
+      // reset palm only if all fingers lifted
+      // if self.count_fingers() == 0:
+      // reset palm if any finger lifted
+      if self.lifted:
+        self.was_palm = false
+
       self.lifted = false
+
+      if not self.was_palm and self.is_palm():
+        self.was_palm = true
+
+      debug "IS PALM", was_palm
 
     handle_abs(input_event data):
       switch data.code:
@@ -133,6 +150,26 @@ namespace input:
               self.lifted = true
 
           break
+        case ABS_MT_WIDTH_MAJOR:
+          slots[slot].width_major = data.value
+          break
+        case ABS_MT_WIDTH_MINOR:
+          slots[slot].width_minor = data.value
+          break
+        case ABS_MT_TOUCH_MAJOR:
+          slots[slot].size_major = data.value
+          break
+        case ABS_MT_TOUCH_MINOR:
+          slots[slot].size_minor = data.value
+          break
+
+    bool is_palm():
+      size := 0
+      for i := 0; i <= MAX_SLOTS; i++:
+        if slots[i].left == 1:
+          size += slots[i].size_major * slots[i].size_minor
+
+      return size > 1000
 
     def marshal():
       SynMotionEvent syn_ev;
@@ -140,6 +177,7 @@ namespace input:
       syn_ev.left = self.left
       syn_ev.x = self.x
       syn_ev.y = self.y
+
 
       syn_ev.set_original(new TouchEvent(*self))
 
