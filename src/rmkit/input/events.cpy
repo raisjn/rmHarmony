@@ -164,7 +164,7 @@ namespace input:
           slots[slot].size_minor = data.value
           break
 
-    bool is_palm():
+    int max_touch_area():
       size := 0
       for i := 0; i <= MAX_SLOTS; i++:
         if slots[i].left == 1:
@@ -172,7 +172,10 @@ namespace input:
             size = max(slots[i].size_major * slots[i].size_major, size)
           else:
             size = max(slots[i].size_major * slots[i].size_minor, size)
+      return size
 
+    bool is_palm():
+      size := max_touch_area()
 
       debug "TOTAL SIZE", size, MIN_PALM_SIZE
       version := util::get_remarkable_version()

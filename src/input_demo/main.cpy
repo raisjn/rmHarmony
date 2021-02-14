@@ -46,7 +46,7 @@ class App:
     range->set_range(500, 2000)
     h_layout.pack_center(range)
 
-    palm_area = new ui::Text(50, 150, 200, 50, "Palm Width:")
+    palm_area = new ui::Text(50, 150, 150, 50, "Palm Width:")
     palm_area->set_style(
       ui::Stylesheet()
         .valign(ui::Style::VALIGN::MIDDLE)
@@ -89,21 +89,24 @@ class App:
 
   def handle_motion_event(input::SynMotionEvent &syn_ev):
     touch := input::is_touch_event(syn_ev)
-    static bool prev_palm = false
+    static string last_text = ""
     if touch:
       is_palm := touch->is_palm()
 
-      if prev_palm != is_palm:
+      if touch->max_touch_area() == 0:
+        palm_area->text = ""
+      else if is_palm:
+        palm_area->text = "Palm Down"
+      else:
+        palm_area->text = "Finger Down"
+
+      if palm_area->text != last_text:
         palm_area->undraw()
-        if is_palm:
-          palm_area->text = "Palm Down"
-        else:
-          palm_area->text = "Palm Up"
         palm_area->dirty = 1
         fb := framebuffer::get()
         fb->waveform_mode = WAVEFORM_MODE_AUTO
 
-      prev_palm = is_palm
+      last_text = palm_area->text
 
 
 
