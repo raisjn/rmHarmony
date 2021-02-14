@@ -5,6 +5,7 @@ using namespace std
 class App:
   public:
   ui::Scene demo_scene
+  ui::Text *palm_area
 
 
   App():
@@ -38,8 +39,20 @@ class App:
     h_layout.pack_center(new ui::TextInput(0, 50, 1000, 50))
 
     range := new ui::RangeInput(0, 150, 1000, 50)
-    range->set_range(0, 100)
+    range->events.change += PLS_LAMBDA(float f):
+      input::TouchEvent::MIN_PALM_SIZE = int(f * 1500 + 500);
+      fb->waveform_mode = WAVEFORM_MODE_AUTO
+    ;
+    range->set_range(500, 2000)
     h_layout.pack_center(range)
+
+    palm_area = new ui::Text(50, 150, 200, 50, "Palm Width:")
+    palm_area->set_style(
+      ui::Stylesheet()
+        .valign(ui::Style::VALIGN::MIDDLE)
+        .justify(ui::Style::JUSTIFY::LEFT))
+
+    h_layout.pack_start(palm_area)
 
 
     pager := new ui::Pager(0, 0, 500, 500, NULL)
@@ -58,6 +71,9 @@ class App:
 
     h_layout.pack_center(btn)
 
+
+
+
     text_dropdown := new ui::TextDropdown(0, h-200, 200, 50, "Options")
     text_dropdown->dir = ui::TextDropdown::DIRECTION::UP
     ds := text_dropdown->add_section("options")
@@ -72,7 +88,24 @@ class App:
     debug "KEY PRESSED", key_ev.key
 
   def handle_motion_event(input::SynMotionEvent &syn_ev):
-    pass
+    touch := input::is_touch_event(syn_ev)
+    static bool prev_palm = false
+    if touch:
+      is_palm := touch->is_palm()
+
+      if prev_palm != is_palm:
+        palm_area->undraw()
+        if is_palm:
+          palm_area->text = "Palm Down"
+        else:
+          palm_area->text = "Palm Up"
+        palm_area->dirty = 1
+        fb := framebuffer::get()
+        fb->waveform_mode = WAVEFORM_MODE_AUTO
+
+      prev_palm = is_palm
+
+
 
   def run():
 
@@ -82,6 +115,7 @@ class App:
     // just to kick off the app, we do a full redraw
     ui::MainLoop::refresh()
     ui::MainLoop::redraw()
+
     while true:
       ui::MainLoop::main()
       ui::MainLoop::redraw()

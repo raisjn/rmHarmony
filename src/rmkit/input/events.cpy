@@ -94,7 +94,7 @@ namespace input:
     int x=-1, y=-1
     int slot = 0, left = -1
     bool lifted=false
-    static int MAX_SLOTS
+    static int MAX_SLOTS, MIN_PALM_SIZE
     struct TouchPoint:
       int x=-1, y=-1, left=-1
       int size_major = 1
@@ -168,11 +168,16 @@ namespace input:
       size := 0
       for i := 0; i <= MAX_SLOTS; i++:
         if slots[i].left == 1:
-          size += slots[i].size_major * slots[i].size_minor
+          if slots[i].size_minor == 1:
+            size = max(slots[i].size_major * slots[i].size_major, size)
+          else:
+            size = max(slots[i].size_major * slots[i].size_minor, size)
 
+
+      debug "TOTAL SIZE", size, MIN_PALM_SIZE
       version := util::get_remarkable_version()
       if version == util::RM_VERSION::RM2:
-        return size > 1000
+        return size > MIN_PALM_SIZE
 
       return false
 
@@ -212,6 +217,7 @@ namespace input:
         return false
 
   int TouchEvent::MAX_SLOTS = 10
+  int TouchEvent::MIN_PALM_SIZE = 1000
 
   class WacomEvent: public Event:
     public:

@@ -122,8 +122,9 @@ namespace ui:
       for auto ev : in.all_motion_events:
         if filter_palm_events:
           touch := input::is_touch_event(ev)
-          if touch and touch->is_palm():
-              continue
+          is_palm := touch && touch->is_palm()
+          if is_palm:
+            debug "PALM", &touch, is_palm
 
         MainLoop::motion_event(ev)
         if ev._stop_propagation:
