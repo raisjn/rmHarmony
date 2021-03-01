@@ -1,5 +1,6 @@
 #include "../build/rmkit.h"
 #include "../shared/string.h"
+#include "../shared/input_flood.h"
 
 #include "shapes.h"
 #include <sys/types.h>
@@ -155,11 +156,13 @@ void catch_sigint(int):
 def main():
   signal(SIGINT, catch_sigint);
 
+  flood::build_touch_flood()
   // we fork just to be a little bit extra safe with
   // unlocking the input file descriptors
   _pid = fork()
   if _pid:
     wait(NULL)
     ui::MainLoop::in.ungrab()
+    flood::flood_touch_queue()
   else:
     app.run()
