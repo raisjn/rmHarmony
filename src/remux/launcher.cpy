@@ -10,13 +10,13 @@
 #include <dirent.h>
 #include <algorithm>
 #include <unordered_set>
-#include <linux/input.h>
 #include <chrono>
 
-#include "../shared/proc.h"
 #include "../build/rmkit.h"
+#include "../shared/proc.h"
 #include "../genie/gesture_parser.h"
 #include "config.h"
+#include "../shared/input_flood.h"
 
 TIMEOUT := 1
 // all time is in seconds
@@ -228,8 +228,6 @@ class App: public IApp:
   thread* idle_thread
   thread* ipc_thread
 
-  input_event *touch_flood
-  input_event *button_flood
   vector<input::TouchEvent> touch_events
 
   public:
@@ -266,8 +264,8 @@ class App: public IApp:
 
     app_bg = new AppBackground(0, 0, w, h)
 
-    touch_flood = build_touch_flood()
-    button_flood = build_button_flood()
+    flood::build_touch_flood()
+    flood::build_button_flood()
 
     notebook := ui::make_scene()
     notebook->add(app_bg)
@@ -570,61 +568,6 @@ class App: public IApp:
     app_bg->render()
     fb->redraw_screen(true)
 
-  inline void write_input_event(int fd, type, code, value):
-    input_event ev;
-    memset(&ev, 0, sizeof(ev));
-
-    ev.type = type
-    ev.code = code
-    ev.value = value
-
-    if write(fd, &ev, sizeof(ev)) != sizeof(ev):
-      debug "COULDNT WRITE EV", errno
-
-
-  input_event* build_touch_flood():
-    n := 512 * 8
-    num_inst := 4
-    input_event *ev = (input_event*) malloc(sizeof(struct input_event) * n * num_inst)
-    memset(ev, 0, sizeof(input_event) * n * num_inst)
-
-    i := 0
-    while i < n:
-      ev[i++] = input_event{ type:EV_ABS, code:ABS_DISTANCE, value:1 }
-      ev[i++] = input_event{ type:EV_SYN, code:0, value:0 }
-      ev[i++] = input_event{ type:EV_ABS, code:ABS_DISTANCE, value:2 }
-      ev[i++] = input_event{ type:EV_SYN, code:0, value:0 }
-
-    return ev
-
-  input_event* build_button_flood():
-    n := 512 * 8
-    num_inst := 2
-    input_event *ev = (input_event*) malloc(sizeof(struct input_event) * n * num_inst)
-    memset(ev, 0, sizeof(input_event) * n * num_inst)
-
-    i := 0
-    while i < n:
-      ev[i++] = input_event{ type:EV_SYN, code:1, value:0 }
-      ev[i++] = input_event{ type:EV_SYN, code:0, value:1 }
-
-    return ev
-
-
-
-  void flood_touch_queue():
-    fd := ui::MainLoop::in.touch.fd
-    bytes := write(fd, touch_flood, 512 * 8 * 4 * sizeof(input_event))
-
-    ui::MainLoop::reset_gestures()
-
-  // TODO: figure out the right events here to properly flood this device
-  void flood_button_queue():
-    fd := ui::MainLoop::in.button.fd
-    bytes := write(fd, button_flood, 512 * 8 * 2 * sizeof(input_event))
-
-
-
   void launch(string name):
     if name == "":
       return
@@ -646,9 +589,8 @@ class App: public IApp:
 
 
     ui::MainLoop::in.ungrab()
-    flood_touch_queue()
-    flood_button_queue()
-    // flood_button_queue()
+    flood::flood_touch_queue()
+    flood::flood_button_queue()
 
     if app.resume != "" and proc::check_process(app.which):
       proc::launch_process(app.resume)
