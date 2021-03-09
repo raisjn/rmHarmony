@@ -4,6 +4,10 @@ CXX_BIN?=arm-linux-gnueabihf-g++
 CC_BIN?=arm-linux-gnueabihf-gcc
 CPP_FLAGS=-pthread -lpthread -fdata-sections -ffunction-sections -Wl,--gc-sections
 
+ifneq ($(CXX),g++)
+CXX_BIN := $(CXX)
+endif
+
 # BUILD STUFF
 ROOT=${PWD}
 BUILD_DIR=src/build

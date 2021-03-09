@@ -593,10 +593,10 @@ class App: public IApp:
 
     i := 0
     while i < n:
-      ev[i++] = input_event{ type:EV_ABS, code:ABS_DISTANCE, value:1 }
-      ev[i++] = input_event{ type:EV_SYN, code:0, value:0 }
-      ev[i++] = input_event{ type:EV_ABS, code:ABS_DISTANCE, value:2 }
-      ev[i++] = input_event{ type:EV_SYN, code:0, value:0 }
+      ev[i++] = input_event{ time:{}, EV_ABS, code:ABS_DISTANCE, value:1 }
+      ev[i++] = input_event{ time:{}, EV_SYN, code:0, value:0 }
+      ev[i++] = input_event{ time:{}, EV_ABS, code:ABS_DISTANCE, value:2 }
+      ev[i++] = input_event{ time:{}, EV_SYN, code:0, value:0 }
 
     return ev
 
@@ -608,8 +608,8 @@ class App: public IApp:
 
     i := 0
     while i < n:
-      ev[i++] = input_event{ type:EV_SYN, code:1, value:0 }
-      ev[i++] = input_event{ type:EV_SYN, code:0, value:1 }
+      ev[i++] = input_event{ time:{}, EV_SYN, code:1, value:0 }
+      ev[i++] = input_event{ time:{}, EV_SYN, code:0, value:1 }
 
     return ev
 

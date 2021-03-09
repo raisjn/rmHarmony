@@ -24,13 +24,13 @@ compile_arm: ../build/stb.arm.o
 compile_arm: export CPP_FLAGS += -O2
 compile_arm: export OKP_FLAGS += ../build/stb.arm.o
 compile_arm:
-	CXX=${CXX_BIN} okp ${OKP_FLAGS} -- -D"REMARKABLE=1" ${CPP_FLAGS}
+	CXX="${CXX_BIN}" okp ${OKP_FLAGS} -- -D"REMARKABLE=1" ${CPP_FLAGS}
 
 compile_arm_fast: ../build/stb.arm.o
 compile_arm_fast: export CPP_FLAGS += -O0 -g
 compile_arm_fast: export OKP_FLAGS += ../build/stb.arm.o
 compile_arm_fast:
-	CXX=${CXX_BIN} okp ${OKP_FLAGS} -- -D"REMARKABLE=1" ${CPP_FLAGS}
+	CXX="${CXX_BIN}" okp ${OKP_FLAGS} -- -D"REMARKABLE=1" ${CPP_FLAGS}
 
 compile_dev: ../build/stb.x86.o
 compile_dev: export CPP_FLAGS += -O0 -g

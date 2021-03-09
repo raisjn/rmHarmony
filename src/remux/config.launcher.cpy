@@ -23,6 +23,9 @@ RMApp APP_XOCHITL = RMApp %{
   bin : "xochitl",
   which : "xochitl",
   name : "Remarkable",
+  term: "",
+  desc: "",
+  resume: "",
   always_show : true }
 
 RMApp APP_KOREADER = RMApp %{
