@@ -66,6 +66,7 @@ class GestureWidget : public ui::Widget:
 class App:
   public:
   ui::Scene demo_scene
+  ui::Text *palm_area
 
 
   App():
@@ -122,8 +123,20 @@ class App:
     h_layout.pack_center(new ui::TextInput(0, 50, 1000, 50))
 
     range := new ui::RangeInput(0, 150, 1000, 50)
-    range->set_range(0, 100)
+    range->events.change += PLS_LAMBDA(float f):
+      input::TouchEvent::MIN_PALM_SIZE = int(f * 1500 + 500);
+      fb->waveform_mode = WAVEFORM_MODE_AUTO
+    ;
+    range->set_range(500, 2000)
     h_layout.pack_center(range)
+
+    palm_area = new ui::Text(50, 150, 150, 50, "Palm Width:")
+    palm_area->set_style(
+      ui::Stylesheet()
+        .valign(ui::Style::VALIGN::MIDDLE)
+        .justify(ui::Style::JUSTIFY::LEFT))
+
+    h_layout.pack_start(palm_area)
 
 
     pager := new ui::Pager(0, 0, 500, 500, NULL)
@@ -141,6 +154,9 @@ class App:
     ;
 
     h_layout.pack_center(btn)
+
+
+
 
     text_dropdown := new ui::TextDropdown(0, h-200, 200, 50, "Options")
     text_dropdown->dir = ui::TextDropdown::DIRECTION::UP
@@ -160,16 +176,38 @@ class App:
     debug "KEY PRESSED", key_ev.key
 
   def handle_motion_event(input::SynMotionEvent &syn_ev):
-    pass
+    touch := input::is_touch_event(syn_ev)
+    static string last_text = ""
+    if touch:
+      is_palm := touch->is_palm()
+
+      if touch->max_touch_area() == 0:
+        palm_area->text = ""
+      else if is_palm:
+        palm_area->text = "Palm Down"
+      else:
+        palm_area->text = "Finger Down"
+
+      if palm_area->text != last_text:
+        palm_area->undraw()
+        palm_area->dirty = 1
+        fb := framebuffer::get()
+        fb->waveform_mode = WAVEFORM_MODE_AUTO
+
+      last_text = palm_area->text
+
+
 
   def run():
 
     ui::MainLoop::key_event += PLS_DELEGATE(self.handle_key_event)
     ui::MainLoop::motion_event += PLS_DELEGATE(self.handle_motion_event)
+    ui::MainLoop::filter_palm_events = true
 
     // just to kick off the app, we do a full redraw
     ui::MainLoop::refresh()
     ui::MainLoop::redraw()
+
     while true:
       ui::MainLoop::main()
       ui::MainLoop::redraw()

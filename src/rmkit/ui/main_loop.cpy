@@ -49,6 +49,8 @@ namespace ui:
     static input::Input in
     static vector<input::Gesture*> gestures
 
+    static bool filter_palm_events
+
     // variable: motion_event
     // motion_event is used for subscribing to motion_events
     //
@@ -132,7 +134,12 @@ namespace ui:
         for auto g : gestures:
           g->reset()
 
-      for auto ev: ui::MainLoop::in.touch.events:
+      for auto &ev: ui::MainLoop::in.touch.events:
+        if filter_palm_events:
+          if ev.is_palm():
+            for auto g : gestures:
+              g->reset()
+
         for auto g : gestures:
           if ev.lifted:
             if g->valid:
@@ -324,6 +331,7 @@ namespace ui:
   Scene MainLoop::kbd = make_scene()
   bool MainLoop::overlay_is_visible = false
   bool MainLoop::kbd_is_visible = false
+  bool MainLoop::filter_palm_events = false
 
   input::Input MainLoop::in = {}
   vector<input::Gesture*> MainLoop::gestures = {}

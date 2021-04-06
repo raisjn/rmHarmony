@@ -1,6 +1,7 @@
 #include <linux/input.h>
 #include "../defines.h"
 #include "../util/rm2fb.h"
+#include "../util/machine_id.h"
 
 // #define DEBUG_INPUT_EVENT 1
 
@@ -93,12 +94,17 @@ namespace input:
     int x=-1, y=-1
     int slot = 0, left = -1
     bool lifted=false
-    static int MAX_SLOTS
-    struct Point:
+    static int MAX_SLOTS, MIN_PALM_SIZE
+    struct TouchPoint:
       int x=-1, y=-1, left=-1
+      int size_major = 1
+      int size_minor = 1
+      int width_major = 1
+      int width_minor = 1
     ;
 
-    vector<Point> slots;
+
+    vector<TouchPoint> slots;
     TouchEvent():
       slots.resize(MAX_SLOTS)
 
@@ -133,6 +139,37 @@ namespace input:
               self.lifted = true
 
           break
+        case ABS_MT_WIDTH_MAJOR:
+          slots[slot].width_major = data.value
+          break
+        case ABS_MT_WIDTH_MINOR:
+          slots[slot].width_minor = data.value
+          break
+        case ABS_MT_TOUCH_MAJOR:
+          slots[slot].size_major = data.value
+          break
+        case ABS_MT_TOUCH_MINOR:
+          slots[slot].size_minor = data.value
+          break
+
+    int max_touch_area():
+      size := 0
+      for i := 0; i <= MAX_SLOTS; i++:
+        if slots[i].left == 1:
+          if slots[i].size_minor == 1:
+            size = max(slots[i].size_major * slots[i].size_major, size)
+          else:
+            size = max(slots[i].size_major * slots[i].size_minor, size)
+      return size
+
+    bool is_palm():
+      size := max_touch_area()
+
+      version := util::get_remarkable_version()
+      if version == util::RM_VERSION::RM2:
+        return size > MIN_PALM_SIZE
+
+      return size > (MIN_PALM_SIZE / 2)
 
     def marshal():
       SynMotionEvent syn_ev;
@@ -140,6 +177,7 @@ namespace input:
       syn_ev.left = self.left
       syn_ev.x = self.x
       syn_ev.y = self.y
+
 
       syn_ev.set_original(new TouchEvent(*self))
 
@@ -175,6 +213,7 @@ namespace input:
         return false
 
   int TouchEvent::MAX_SLOTS = 10
+  int TouchEvent::MIN_PALM_SIZE = 1000
 
   class WacomEvent: public Event:
     public:
